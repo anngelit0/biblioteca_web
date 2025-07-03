@@ -1,7 +1,35 @@
 import string
 from flask import Flask, render_template, request
 
+from flask_sqlalchemy import SQLAlchemy
+
 app = Flask(__name__)
+
+# Ejemplo usando INTERNAL DATABASE URL de Render
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://usuario:contraseña@host-internal:5432/biblioteca_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+class Libro(db.Model):
+    __tablename__ = 'libros'
+
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    autor = db.Column(db.String(150), nullable=True)
+    genero = db.Column(db.String(100), nullable=True)
+    editorial = db.Column(db.String(150), nullable=True)
+    anio = db.Column(db.Integer, nullable=True)
+    ubicacion = db.Column(db.String(100), nullable=True)
+    estado = db.Column(db.String(50), nullable=True)
+    
+    def __repr__(self):
+        return f"<Libro {self.titulo}>"
+
+# Para crear las tablas en la base de datos (solo la primera vez)
+with app.app_context():
+    db.create_all()
+
 
 @app.route('/')
 def inicio():
