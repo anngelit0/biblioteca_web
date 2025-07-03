@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # Ejemplo usando INTERNAL DATABASE URL de Render
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://usuario:contraseña@host-internal:5432/biblioteca_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://catalogo_1kp6_user:rMZ0nuyPp7W5OVXu1b7tMq3BqIafLBjJ@dpg-d1jg87emcj7s73dcr2o0-a/catalogo_1kp6'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
