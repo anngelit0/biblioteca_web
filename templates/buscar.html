@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Búsqueda de Libros</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url("{{ url_for('static', filename='img/busquedalibros.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Anton', sans-serif;
+        }
+
+        .contenedor {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 10px;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .barra-busqueda {
+            background-color: rgba(255, 193, 7, 0.5);
+            border: none;
+            padding: 15px;
+            font-size: 1.5rem;
+            border-radius: 10px;
+            width: 100%;
+            color: #001f3f;
+        }
+
+        .barra-busqueda:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.8);
+        }
+
+        .cursor-parpadeante {
+            caret-color: #001f3f;
+        }
+
+        .abecedario .btn {
+            width: 40px;
+            font-weight: bold;
+        }
+
+        .barra-resultados {
+            background-color: rgba(255, 255, 255, 0.3);
+            height: 300px;
+            border-radius: 10px;
+            width: 100%;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        h1, p {
+            text-align: center;
+            color: #FFC107;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Búsqueda de Libros</h1>
+        <p>Aquí puedes buscar tus libros favoritos.</p>
+
+        <form method="GET" action="/buscar" class="w-100">
+            <input
+                type="text"
+                name="query"
+                class="barra-busqueda cursor-parpadeante"
+                placeholder="Escribe aquí para buscar..."
+                value="{{ query }}"
+                autofocus
+            >
+        </form>
+
+        <div class="abecedario">
+            {% for letra in letras %}
+                <a href="/buscar?letra={{ letra }}" class="btn btn-outline-warning m-1">{{ letra }}</a>
+            {% endfor %}
+             <a href="/buscar" class="btn btn-danger btn-lg m-1 w-auto">TODO</a>
+        </div>
+
+        <div class="barra-resultados">
+            {% if catalogo %}
+                <ul class="list-group list-group-flush">
+                    {% for libro in catalogo %}
+                        <li class="list-group-item bg-transparent text-white">
+                            {{ libro.titulo }} - {{ libro.autor }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-white">No hay resultados.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
