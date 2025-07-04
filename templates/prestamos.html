@@ -20,19 +20,19 @@
         }
 
         .overlay {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.85);
             padding: 30px;
             border-radius: 10px;
-            max-width: 700px;
+            max-width: 900px;
             width: 100%;
             box-shadow: 0 0 20px rgba(0,0,0,0.3);
         }
 
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #ffc107;
             margin-bottom: 30px;
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
         }
 
@@ -54,9 +54,24 @@
             margin-top: 20px;
             font-family: 'Poppins', sans-serif;
         }
+
+        .table-custom {
+            background-color: rgba(255, 255, 255, 0.85);
+        }
     </style>
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div class="overlay">
         <h1>Préstamos</h1>
 
@@ -129,6 +144,37 @@
             <h3 class="text-center text-warning mb-3">
                 Vas a pedir prestado: <strong>{{ titulo }}</strong>
             </h3>
+        {% endif %}
+
+        <h2 class="mt-5">Préstamos Activos</h2>
+
+        {% if prestamos and prestamos|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-custom table-bordered">
+                    <thead class="table-warning">
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Nombre del Lector</th>
+                            <th>Fecha de Préstamo</th>
+                            <th>Fecha de Devolución</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prestamo in prestamos %}
+                        <tr>
+                            <td>{{ prestamo.id }}</td>
+                            <td>{{ prestamo.titulo }}</td>
+                            <td>{{ prestamo.nombre_lector }}</td>
+                            <td>{{ prestamo.fecha_prestamo }}</td>
+                            <td>{{ prestamo.fecha_devolucion }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-center text-muted fs-5">No hay préstamos activos en este momento.</p>
         {% endif %}
     </div>
 
