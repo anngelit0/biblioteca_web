@@ -99,7 +99,7 @@ def buscar():
 def registrar():
     return render_template('registrar.html')
 
-@app.route('/prestamo', methods=['POST'])
+@app.route('/prestamos', methods=['POST'])
 def registrar_prestamo():
     # Lógica aquí…
     return render_template('prestamos.html', mensaje_tomar="¡Disfruta tu lectura!")
