@@ -145,7 +145,7 @@
                         <tbody>
                             {% for libro in catalogo %}
                             <tr>
-                                <td>{{ libro.id if libro.id is defined else loop.index }}</td>
+                                <td>{{ libro.id }}</td>
                                 <td>{{ libro.titulo }}</td>
                                 <td>{{ libro.autor }}</td>
                                 <td>{{ libro.genero }}</td>
@@ -155,8 +155,7 @@
                                 <td>{{ libro.estado }}</td>
                                 <td>
                                     {% if libro.estado == 'Disponible' %}
-                                        <a href="{{ url_for('prestamos', id=libro.id if libro.id is defined else loop.index, titulo=libro.titulo) }}"
-                                           class="btn btn-prestamo btn-sm">
+                                        <a href="{{ url_for('prestamos', id=libro.id, titulo=libro.titulo) }}" class="btn btn-prestamo btn-sm">
                                             Tomar prestado
                                         </a>
                                     {% else %}
