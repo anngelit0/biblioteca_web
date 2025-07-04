@@ -101,9 +101,13 @@ def registrar():
 
 @app.route('/prestamos')
 def prestamos():
-    libro_id = request.args.get('id')
-    return render_template('prestamos.html', libro_id=libro_id)
-
+    libro_id = request.args.get("id")
+    titulo = request.args.get("titulo")
+    return render_template(
+        'prestamos.html',
+        libro_id=libro_id,
+        titulo=titulo
+    )
 
 @app.route('/devolver', methods=['POST'])
 def devolver_libro():
