@@ -1,12 +1,16 @@
 import string
+import os
 from flask import Flask, render_template, request
 
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Ejemplo usando INTERNAL DATABASE URL de Render
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://catalogo_1kp6_user:rMZ0nuyPp7W5OVXu1b7tMq3BqIafLBjJ@dpg-d1jg87emcj7s73dcr2o0-a/catalogo_1kp6'
+if os.environ.get("FLASK_ENV") == "production":
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://catalogo_1kp6_user:rMZ0nuyPp7W5OVXu1b7tMq3BqIafLBj@dpg-d1jg87emcj7s73dcr2o0-a/catalogo_1kp6'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///local.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
