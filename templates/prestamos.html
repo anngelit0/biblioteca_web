@@ -2,170 +2,136 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Búsqueda de Libros</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Préstamos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-image: url("{{ url_for('static', filename='img/busquedalibros.png') }}");
+            background: url("{{ url_for('static', filename='img/prestamos.png') }}") no-repeat center center fixed;
             background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            height: 100vh;
             font-family: 'Poppins', sans-serif;
+            color: #333;
+            overflow-x: hidden;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-        }
-
-        .contenedor {
-            background-color: rgba(255, 255, 255, 0.5);
+            justify-content: center;
             padding: 40px;
-            border-radius: 10px;
-            width: 80%;
-            max-height: 90vh;
-            overflow-y: auto;
         }
 
-        h1, p {
-            text-align: center;
-            color: #FFC107;
-        }
-
-        .barra-busqueda {
-            background-color: rgba(255, 193, 7, 0.5);
-            border: none;
-            padding: 15px;
-            font-size: 1.5rem;
+        .overlay {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 30px;
             border-radius: 10px;
+            max-width: 700px;
             width: 100%;
-            color: #001f3f;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
         }
 
-        .barra-busqueda:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.8);
-        }
-
-        .cursor-parpadeante {
-            caret-color: #001f3f;
-        }
-
-        .abecedario {
+        h1 {
             text-align: center;
-            margin: 20px 0;
+            color: #ffc107;
+            margin-bottom: 30px;
+            font-size: 3rem;
+            font-weight: 700;
         }
 
-        .abecedario .btn {
-            width: 40px;
-            font-weight: bold;
-        }
-
-        .btn-todo {
-            min-width: 80px;
-            font-weight: bold;
-        }
-
-        .tabla-catalogo {
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        th {
-            background-color: #001f3f;
-            color: white;
-            text-align: center;
-        }
-
-        td {
-            color: #001f3f;
-        }
-
-        .btn-prestamo {
+        .btn-custom {
             background-color: #ffc107;
-            color: #001f3f;
+            color: #000;
             font-weight: bold;
+            border: none;
         }
 
-        .btn-prestamo:hover {
+        .btn-custom:hover {
             background-color: #ffca2c;
-            color: #001f3f;
         }
 
-        table {
-            width: 100%;
+        .mensaje {
+            color: #28a745;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-top: 20px;
+            font-family: 'Poppins', sans-serif;
         }
     </style>
 </head>
 <body>
-    <div class="contenedor">
-        <h1>Búsqueda de Libros</h1>
-        <p>Aquí puedes buscar tus libros favoritos.</p>
+    <div class="overlay">
+        <h1>Préstamos</h1>
 
-        <!-- Barra de búsqueda -->
-        <form method="GET" action="/buscar" class="mb-3">
-            <input
-                type="text"
-                name="query"
-                class="barra-busqueda cursor-parpadeante"
-                placeholder="Escribe aquí para buscar..."
-                value="{{ query }}"
-                autofocus
-            >
-        </form>
+        {% if titulo_libro %}
+            <p class="text-center fs-4">
+                Estás solicitando el libro: <strong class="text-warning">{{ titulo_libro }}</strong>
+            </p>
+        {% else %}
+            <p class="text-center text-muted fs-5">
+                Selecciona un libro en la búsqueda para iniciar un préstamo.
+            </p>
+        {% endif %}
 
-        <!-- Botones del abecedario -->
-        <div class="abecedario">
-            {% for letra in letras %}
-                <a href="/buscar?letra={{ letra }}" class="btn btn-outline-warning m-1">{{ letra }}</a>
-            {% endfor %}
-            <a href="/buscar" class="btn btn-danger btn-todo m-1">TODO</a>
+        <div class="text-center mb-4">
+            <button class="btn btn-custom me-3" id="btnTomar">Tomar prestado un libro</button>
+            <button class="btn btn-custom" id="btnDevolver">Devolver un libro</button>
         </div>
 
-        <!-- Resultados del catálogo -->
-        <div class="tabla-catalogo">
-            {% if catalogo %}
-                <div class="table-responsive">
-                    <table class="table table-borderless table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Título</th>
-                                <th>Autor</th>
-                                <th>Género</th>
-                                <th>Editorial</th>
-                                <th>Año</th>
-                                <th>Ubicación</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for libro in catalogo %}
-                            <tr>
-                                <td>{{ libro.id if libro.id is defined else loop.index }}</td>
-                                <td>{{ libro.titulo }}</td>
-                                <td>{{ libro.autor }}</td>
-                                <td>{{ libro.genero }}</td>
-                                <td>{{ libro.editorial }}</td>
-                                <td>{{ libro.anio }}</td>
-                                <td>{{ libro.ubicacion }}</td>
-                                <td>{{ libro.estado }}</td>
-                                <td>
-                                    <a href="{{ url_for('prestamos') }}?id={{ libro.id if libro.id is defined else loop.index }}" class="btn btn-prestamo btn-sm">Tomar prestado</a>
-                                </
-                            ></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="collapse" id="formTomar">
+            <form action="/prestamo" method="post" class="bg-white bg-opacity-75 p-4 rounded text-dark">
+                <div class="mb-3">
+                    <label for="libro_id" class="form-label">ID del Libro</label>
+                    <input type="number" name="libro_id" id="libro_id" class="form-control" required value="{{ libro_id }}">
                 </div>
-            {% else %}
-                <p class="text-white text-center">No hay resultados.</p>
-            {% endif %}
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre del lector</label>
+                    <input type="text" name="nombre" id="nombre" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="fecha_prestamo" class="form-label">Fecha de préstamo</label>
+                    <input type="date" name="fecha_prestamo" id="fecha_prestamo" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="fecha_devolucion" class="form-label">Fecha de devolución</label>
+                    <input type="date" name="fecha_devolucion" id="fecha_devolucion" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-success">Confirmar</button>
+            </form>
         </div>
+
+        <div class="collapse" id="formDevolver">
+            <form action="/devolver" method="post" class="bg-white bg-opacity-75 p-4 rounded text-dark">
+                <div class="mb-3">
+                    <label for="libro_id_devolver" class="form-label">ID del Libro a devolver</label>
+                    <input type="number" name="libro_id_devolver" id="libro_id_devolver" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="comentarios" class="form-label">Comentarios (opcional)</label>
+                    <textarea name="comentarios" id="comentarios" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Confirmar devolución</button>
+            </form>
+        </div>
+
+        {% if mensaje_tomar %}
+            <div class="mensaje">{{ mensaje_tomar }}</div>
+        {% endif %}
+        {% if mensaje_devolver %}
+            <div class="mensaje">{{ mensaje_devolver }}</div>
+        {% endif %}
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('btnTomar').addEventListener('click', () => {
+            const tomar = new bootstrap.Collapse(document.getElementById('formTomar'), { toggle: true });
+            const devolver = new bootstrap.Collapse(document.getElementById('formDevolver'), { toggle: false });
+            devolver.hide();
+        });
+
+        document.getElementById('btnDevolver').addEventListener('click', () => {
+            const devolver = new bootstrap.Collapse(document.getElementById('formDevolver'), { toggle: true });
+            const tomar = new bootstrap.Collapse(document.getElementById('formTomar'), { toggle: false });
+            tomar.hide();
+        });
+    </script>
 </body>
 </html>
