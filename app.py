@@ -43,10 +43,33 @@ def buscar():
     letras = list(string.ascii_uppercase)
 
     catalogo = [
-        {'titulo': 'Harry Potter', 'autor': 'J.K. Rowling'},
-        {'titulo': 'Cien Años de Soledad', 'autor': 'Gabriel García Márquez'},
-        {'titulo': 'Don Quijote', 'autor': 'Miguel de Cervantes'},
-        {'titulo': 'Alicia en el País de las Maravillas', 'autor': 'Lewis Carroll'}
+        {
+            'titulo': 'Harry Potter',
+            'autor': 'J.K. Rowling',
+            'genero': 'Fantasía',
+            'editorial': 'Salamandra',
+            'anio': 1997,
+            'ubicacion': 'Estante A3',
+            'estado': 'Disponible'
+        },
+        {
+            'titulo': 'Cien Años de Soledad',
+            'autor': 'Gabriel García Márquez',
+            'genero': 'Realismo Mágico',
+            'editorial': 'Sudamericana',
+            'anio': 1967,
+            'ubicacion': 'Estante B1',
+            'estado': 'Prestado'
+        },
+        {
+            'titulo': 'Don Quijote',
+            'autor': 'Miguel de Cervantes',
+            'genero': 'Novela',
+            'editorial': 'Francisco de Robles',
+            'anio': 1605,
+            'ubicacion': 'Estante C2',
+            'estado': 'Disponible'
+        }
     ]
 
     # Filtrado por búsqueda
