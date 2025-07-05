@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Búsqueda de Libros</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
     <style>
         body {
             margin: 0;
@@ -77,10 +77,13 @@
         th {
             background-color: #001f3f;
             color: white;
+            text-align: center;
         }
 
         td {
             color: #fff;
+            text-align: center;
+            vertical-align: middle;
         }
 
         .btn-prestamo {
@@ -94,8 +97,24 @@
             color: #001f3f;
         }
 
+        .btn-baja {
+            background-color: #dc3545;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .btn-baja:hover {
+            background-color: #bb2d3b;
+            color: #fff;
+        }
+
         table {
             width: 100%;
+        }
+
+        /* Mini formulario de confirmación para dar baja */
+        .form-baja-confirmacion {
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -161,6 +180,18 @@
                                     {% else %}
                                         <span class="text-danger fw-bold">No disponible</span>
                                     {% endif %}
+
+                                    <!-- Botón para mostrar formulario de baja -->
+                                    <button type="button" class="btn btn-baja btn-sm ms-2" onclick="toggleBajaForm('{{ libro.id }}')">
+                                        Dar de baja
+                                    </button>
+
+                                    <!-- Mini formulario para confirmar baja -->
+                                    <form action="{{ url_for('baja') }}" method="post" id="form-baja-{{ libro.id }}" class="d-none form-baja-confirmacion">
+                                        <input type="hidden" name="id_baja" value="{{ libro.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Confirmar</button>
+                                        <button type="button" class="btn btn-sm btn-secondary" onclick="toggleBajaForm('{{ libro.id }}')">Cancelar</button>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -172,5 +203,16 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+        function toggleBajaForm(libroId) {
+            const form = document.getElementById('form-baja-' + libroId);
+            if (form.classList.contains('d-none')) {
+                form.classList.remove('d-none');
+            } else {
+                form.classList.add('d-none');
+            }
+        }
+    </script>
 </body>
 </html>
