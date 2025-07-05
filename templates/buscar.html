@@ -155,7 +155,7 @@
                                 <td>{{ libro.estado }}</td>
                                 <td>
                                     {% if libro.estado == 'Disponible' %}
-                                        <a href="{{ url_for('prestamos', id=libro.id, titulo=libro.titulo) }}" class="btn btn-prestamo btn-sm">
+                                        <a href="{{ url_for('prestamos', libro_id=libro.id, titulo=libro.titulo) }}" class="btn btn-prestamo btn-sm">
                                             Tomar prestado
                                         </a>
                                     {% else %}
