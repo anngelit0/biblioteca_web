@@ -145,7 +145,7 @@
                         <tbody>
                             {% for libro in catalogo %}
                             <tr>
-                                <td>{{ libro.id }}</td>
+                                <td>{{ loop.index }}</td>
                                 <td>{{ libro.titulo }}</td>
                                 <td>{{ libro.autor }}</td>
                                 <td>{{ libro.genero }}</td>

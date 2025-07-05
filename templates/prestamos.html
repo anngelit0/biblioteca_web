@@ -75,9 +75,10 @@
     <div class="overlay">
         <h1>Préstamos</h1>
 
-        {% if titulo_libro %}
+        {% if titulo %}
             <p class="text-center fs-4">
-                Estás solicitando el libro: <strong class="text-warning">{{ titulo_libro }}</strong>
+                Estás solicitando el libro: 
+                <strong class="text-warning">{{ titulo }}</strong>
             </p>
         {% else %}
             <p class="text-center text-muted fs-5">
@@ -101,8 +102,14 @@
                 <div class="mb-3">
                     <label for="libro_id" class="form-label">ID del Libro</label>
                     <input type="number" name="libro_id" id="libro_id"
-                            class="form-control"
-                            value="{{ libro_id if libro_id is not none else '' }}" required>
+                        class="form-control"
+                        value="{{ libro_id or '' }}" readonly required>
+                </div>
+                <div class="mb-3">
+                    <label for="titulo" class="form-label">Título del Libro</label>
+                    <input type="text" name="titulo" id="titulo" 
+                        class="form-control" 
+                        value="{{ titulo or '' }}" readonly>
                 </div>
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre del lector</label>
@@ -134,18 +141,6 @@
             </form>
         </div>
 
-        {% if mensaje_tomar %}
-            <div class="mensaje">{{ mensaje_tomar }}</div>
-        {% endif %}
-        {% if mensaje_devolver %}
-            <div class="mensaje">{{ mensaje_devolver }}</div>
-        {% endif %}
-        {% if titulo %}
-            <h3 class="text-center text-warning mb-3">
-                Vas a pedir prestado: <strong>{{ titulo }}</strong>
-            </h3>
-        {% endif %}
-
         <h2 class="mt-5">Préstamos Activos</h2>
 
         {% if prestamos and prestamos|length > 0 %}
@@ -163,7 +158,7 @@
                     <tbody>
                         {% for prestamo in prestamos %}
                         <tr>
-                            <td>{{ prestamo.id }}</td>
+                            <td>{{ prestamo.libro_id }}</td>
                             <td>{{ prestamo.titulo }}</td>
                             <td>{{ prestamo.nombre_lector }}</td>
                             <td>{{ prestamo.fecha_prestamo }}</td>

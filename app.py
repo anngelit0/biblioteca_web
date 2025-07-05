@@ -13,7 +13,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Modelos
+# -----------------------
+# MODELOS
+# -----------------------
+
 class Libro(db.Model):
     __tablename__ = 'libros'
     id = db.Column(db.Integer, primary_key=True)
@@ -30,6 +33,7 @@ class Prestamo(db.Model):
     __tablename__ = 'prestamos'
     id = db.Column(db.Integer, primary_key=True)
     libro_id = db.Column(db.Integer, db.ForeignKey('libros.id'), nullable=False)
+    titulo = db.Column(db.String(200), nullable=False)  # Campo título en préstamo
     nombre_lector = db.Column(db.String(150), nullable=False)
     fecha_prestamo = db.Column(db.Date, nullable=False)
     fecha_devolucion = db.Column(db.Date, nullable=False)
@@ -38,7 +42,9 @@ class Prestamo(db.Model):
 with app.app_context():
     db.create_all()
 
-# Rutas
+# -----------------------
+# RUTAS
+# -----------------------
 
 @app.route('/')
 def inicio():
@@ -94,46 +100,77 @@ def registrar():
 
 @app.route('/prestamos', methods=['GET', 'POST'])
 def prestamos():
-    if request.method == 'POST':
-        libro_id = request.form.get('libro_id')
-        nombre_lector = request.form.get('nombre')
-        fecha_prestamo = request.form.get('fecha_prestamo')
-        fecha_devolucion = request.form.get('fecha_devolucion')
+    # Obtener parámetros GET (cuando se abre el formulario desde buscar)
+    libro_id = request.args.get("libro_id")
+    titulo_libro = request.args.get("titulo")
 
-        if not all([libro_id, nombre_lector, fecha_prestamo, fecha_devolucion]):
+    if request.method == 'POST':
+        libro_id = request.form.get("libro_id")
+        titulo = request.form.get("titulo")
+        nombre = request.form.get("nombre")
+        fecha_prestamo = request.form.get("fecha_prestamo")
+        fecha_devolucion = request.form.get("fecha_devolucion")
+
+        if not all([libro_id, nombre, fecha_prestamo, fecha_devolucion]):
             flash("Todos los campos son obligatorios.", "danger")
             return redirect(url_for('prestamos'))
 
-        libro = Libro.query.get(int(libro_id))
-        if not libro:
-            flash("Libro no encontrado.", "danger")
-            return redirect(url_for('prestamos'))
-        if libro.estado == 'Prestado':
-            flash("El libro ya está prestado.", "warning")
-            return redirect(url_for('prestamos'))
-
         try:
-            prestamo = Prestamo(
+            libro = Libro.query.get(int(libro_id))
+            if not libro:
+                flash("Libro no encontrado.", "danger")
+                return redirect(url_for('prestamos'))
+
+            if libro.estado == 'Prestado':
+                flash("El libro ya está prestado.", "warning")
+                return redirect(url_for('prestamos'))
+
+            # Si no se pasó título por el form, tomarlo del libro
+            if not titulo:
+                titulo = libro.titulo
+
+            prestamo_nuevo = Prestamo(
                 libro_id=libro.id,
-                nombre_lector=nombre_lector,
+                titulo=titulo,
+                nombre_lector=nombre,
                 fecha_prestamo=datetime.strptime(fecha_prestamo, '%Y-%m-%d').date(),
                 fecha_devolucion=datetime.strptime(fecha_devolucion, '%Y-%m-%d').date()
             )
             libro.estado = 'Prestado'
-            db.session.add(prestamo)
+
+            db.session.add(prestamo_nuevo)
             db.session.commit()
             flash("Préstamo registrado correctamente.", "success")
             return redirect(url_for('prestamos'))
+
         except Exception as e:
             db.session.rollback()
             flash(f"Error al registrar préstamo: {e}", "danger")
             return redirect(url_for('prestamos'))
 
-    prestamos_activos = Prestamo.query.join(Libro).add_columns(
-        Prestamo.id, Libro.titulo, Prestamo.nombre_lector, Prestamo.fecha_prestamo, Prestamo.fecha_devolucion
-    ).all()
+    # Consultar préstamos existentes para mostrar
+    try:
+        prestamos = Prestamo.query.all()
+        prestamos_list = []
+        for p in prestamos:
+            prestamos_list.append({
+                'libro_id': p.libro_id,  # Corregido para que sea 'libro_id' aquí también
+                'titulo': p.titulo,
+                'nombre_lector': p.nombre_lector,
+                'fecha_prestamo': p.fecha_prestamo.strftime('%Y-%m-%d'),
+                'fecha_devolucion': p.fecha_devolucion.strftime('%Y-%m-%d')
+            })
+    except Exception as e:
+        print("Error al cargar préstamos:", e)
+        prestamos_list = []
 
-    return render_template('prestamos.html', prestamos=prestamos_activos)
+    # Enviar variables a la plantilla
+    return render_template(
+        'prestamos.html',
+        prestamos=prestamos_list,
+        libro_id=libro_id,
+        titulo=titulo_libro if libro_id else None  # Esta es la corrección principal
+    )
 
 @app.route('/devolver', methods=['POST'])
 def devolver():
@@ -161,7 +198,6 @@ def devolver():
 
     return redirect(url_for('prestamos'))
 
-# Ruta para eliminar libro (baja)
 @app.route('/baja', methods=['POST'])
 def baja():
     id_baja = request.form.get('id_baja')
