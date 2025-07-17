@@ -53,6 +53,14 @@
             caret-color: #001f3f;
         }
 
+        .filtros {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
         .abecedario {
             text-align: center;
             margin: 20px 0;
@@ -123,24 +131,32 @@
         <h1>Búsqueda de Libros</h1>
         <p>Aquí puedes buscar tus libros favoritos.</p>
 
-        <!-- Barra de búsqueda -->
+        <!-- Filtros: búsqueda libre y filtrado por casa -->
         <form method="GET" action="/buscar" class="mb-3">
-            <input
-                type="text"
-                name="query"
-                class="barra-busqueda cursor-parpadeante"
-                placeholder="Escribe aquí para buscar..."
-                value="{{ query }}"
-                autofocus
-            >
+            <div class="filtros">
+                <input
+                    type="text"
+                    name="query"
+                    class="barra-busqueda cursor-parpadeante"
+                    placeholder="Escribe aquí para buscar..."
+                    value="{{ query }}"
+                    autofocus
+                >
+                <select name="casa" class="form-select" style="max-width: 200px;">
+                    <option value="">Todas las casas</option>
+                    <option value="marcela" {% if casa=='marcela' %}selected{% endif %}>Casa de Marcela</option>
+                    <option value="victor" {% if casa=='victor' %}selected{% endif %}>Casa de Víctor</option>
+                </select>
+                <button type="submit" class="btn btn-warning">Filtrar</button>
+            </div>
         </form>
 
         <!-- Botones del abecedario -->
         <div class="abecedario">
             {% for letra in letras %}
-                <a href="/buscar?letra={{ letra }}" class="btn btn-outline-warning m-1">{{ letra }}</a>
+                <a href="/buscar?letra={{ letra }}{% if casa %}&casa={{ casa }}{% endif %}" class="btn btn-outline-warning m-1">{{ letra }}</a>
             {% endfor %}
-            <a href="/buscar" class="btn btn-danger btn-todo m-1">TODO</a>
+            <a href="/buscar{% if casa %}?casa={{ casa }}{% endif %}" class="btn btn-danger btn-todo m-1">TODO</a>
         </div>
 
         <!-- Resultados del catálogo -->
@@ -156,7 +172,9 @@
                                 <th>Género</th>
                                 <th>Editorial</th>
                                 <th>Año</th>
+                                <th>Idioma</th>
                                 <th>Ubicación</th>
+                                <th>Casa</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -170,7 +188,9 @@
                                 <td>{{ libro.genero }}</td>
                                 <td>{{ libro.editorial }}</td>
                                 <td>{{ libro.anio }}</td>
+                                <td>{{ libro.idioma }}</td>
                                 <td>{{ libro.ubicacion }}</td>
+                                <td>{{ libro.casa|capitalize }}</td>
                                 <td>{{ libro.estado }}</td>
                                 <td>
                                     {% if libro.estado == 'Disponible' %}
@@ -207,11 +227,7 @@
     <script>
         function toggleBajaForm(libroId) {
             const form = document.getElementById('form-baja-' + libroId);
-            if (form.classList.contains('d-none')) {
-                form.classList.remove('d-none');
-            } else {
-                form.classList.add('d-none');
-            }
+            form.classList.toggle('d-none');
         }
     </script>
 </body>
