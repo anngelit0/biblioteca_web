@@ -77,8 +77,20 @@
                 <input type="number" name="anio" id="anio" class="form-control" required>
             </div>
             <div class="mb-3">
+                <label for="idioma" class="form-label">Idioma</label>
+                <input type="text" name="idioma" id="idioma" class="form-control" required>
+            </div>
+            <div class="mb-3">
                 <label for="ubicacion" class="form-label">Ubicación</label>
                 <input type="text" name="ubicacion" id="ubicacion" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="casa" class="form-label">Casa</label>
+                <select name="casa" id="casa" class="form-select" required>
+                    <option value="">Selecciona una casa</option>
+                    <option value="marcela">Casa de Marcela</option>
+                    <option value="victor">Casa de Víctor</option>
+                </select>
             </div>
             <button type="submit" class="btn btn-custom w-100">Registrar Libro</button>
         </form>
