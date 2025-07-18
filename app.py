@@ -176,7 +176,13 @@ def recuperar_contrasena():
 
 @app.route('/')
 def inicio():
-    return render_template('inicio.html')
+    user_id = session.get('user_id')
+    username = ''
+    if user_id:
+        usuario = Usuario.query.get(user_id)
+        if usuario:
+            username = usuario.nombre_usuario
+    return render_template('inicio.html', username=username)
 
 @app.route('/buscar')
 def buscar():
