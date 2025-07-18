@@ -1,11 +1,9 @@
-# ... [Líneas iniciales sin cambios] ...
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import string
-import os
-import re  # <-- Para validaciones
+import re
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -77,13 +75,11 @@ PREGUNTAS_VALIDAS = [
 
 # Función para validar nombre de usuario
 def es_usuario_valido(nombre_usuario):
-    # Permitir sólo letras, números, guion bajo y puntos, mínimo 3 y máximo 30 caracteres, sin espacios
-    patron = r'^[\w\.]{3,30}$'
+    patron = r'^[\w\.]{3,30}$'  # Letras, números, _ y ., 3-30 caracteres, sin espacios
     return re.match(patron, nombre_usuario) is not None
 
 # Función para validar contraseña
 def es_contrasena_valida(contrasena):
-    # Mínimo 6 caracteres, sin espacios
     return len(contrasena) >= 6 and ' ' not in contrasena
 
 # -----------------------
@@ -97,27 +93,22 @@ def registro():
         pregunta_seguridad = request.form['pregunta_seguridad']
         respuesta_seguridad = request.form['respuesta_seguridad'].strip()
 
-        # Validar usuario
         if not es_usuario_valido(nombre_usuario):
             flash("El nombre de usuario debe tener entre 3 y 30 caracteres, sólo letras, números, guion bajo y puntos, sin espacios.", "danger")
             return redirect(url_for('registro'))
 
-        # Validar contraseña
         if not es_contrasena_valida(contrasena):
             flash("La contraseña debe tener al menos 6 caracteres y no contener espacios.", "danger")
             return redirect(url_for('registro'))
 
-        # Validar pregunta de seguridad
         if pregunta_seguridad not in PREGUNTAS_VALIDAS:
             flash("Pregunta de seguridad inválida.", "danger")
             return redirect(url_for('registro'))
 
-        # Validar respuesta de seguridad no vacía ni con espacios
         if not respuesta_seguridad or ' ' in respuesta_seguridad:
             flash("La respuesta de seguridad debe ser una sola palabra, sin espacios.", "danger")
             return redirect(url_for('registro'))
 
-        # Validar usuario único
         if Usuario.query.filter_by(nombre_usuario=nombre_usuario).first():
             flash("El nombre de usuario ya existe.", "danger")
             return redirect(url_for('registro'))
@@ -133,25 +124,24 @@ def registro():
         db.session.commit()
 
         flash("Registro exitoso. Por favor inicia sesión.", "success")
-        return redirect(url_for('login'))
+        return redirect(url_for('inicio'))
 
     return render_template('registro.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        nombre_usuario = request.form['nombre_usuario']
-        contrasena = request.form['contrasena']
+    nombre_usuario = request.form['nombre_usuario']
+    contrasena = request.form['contrasena']
 
-        usuario = Usuario.query.filter_by(nombre_usuario=nombre_usuario).first()
-        if usuario and usuario.check_password(contrasena):
-            session.clear()
-            session['user_id'] = usuario.id
-            flash("Sesión iniciada", "success")
-            return redirect(url_for('inicio'))
-        else:
-            flash("Usuario o contraseña incorrectos", "danger")
-    return render_template('login.html')
+    usuario = Usuario.query.filter_by(nombre_usuario=nombre_usuario).first()
+    if usuario and usuario.check_password(contrasena):
+        session.clear()
+        session['user_id'] = usuario.id
+        flash("Sesión iniciada", "success")
+        return redirect(url_for('inicio'))
+    else:
+        flash("Usuario o contraseña incorrectos", "danger")
+        return redirect(url_for('inicio'))
 
 @app.route('/invitado')
 def invitado():
@@ -177,7 +167,7 @@ def recuperar_contrasena():
             usuario.set_password(nueva_contrasena)
             db.session.commit()
             flash("Contraseña actualizada exitosamente.", "success")
-            return redirect(url_for('login'))
+            return redirect(url_for('inicio'))
         else:
             flash("Datos incorrectos.", "danger")
             return redirect(url_for('recuperar_contrasena'))
