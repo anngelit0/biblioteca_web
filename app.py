@@ -1,13 +1,14 @@
-import string
-import os
+# ... [Líneas iniciales sin cambios] ...
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import string
+import os
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Para mensajes flash
+app.secret_key = "supersecretkey"
 
-# Conexión fija a PostgreSQL en Render
+# Conexión a PostgreSQL en Render
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://catalogo_1kp6_user:rMZ0nuyPp7W5OVXu1b7tMq3BqIafLBjJ@dpg-d1jg87emcj7s73dcr2o0-a.oregon-postgres.render.com/catalogo_1kp6'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -27,18 +28,19 @@ class Libro(db.Model):
     anio = db.Column(db.Integer, nullable=False)
     ubicacion = db.Column(db.String(100), nullable=False)
     estado = db.Column(db.String(50), nullable=False, default='Disponible')
+    idioma = db.Column(db.String(100), nullable=True)   # Nuevo campo
+    casa = db.Column(db.String(100), nullable=True)     # Nuevo campo
     prestamos = db.relationship('Prestamo', backref='libro', cascade="all, delete-orphan")
 
 class Prestamo(db.Model):
     __tablename__ = 'prestamos'
     id = db.Column(db.Integer, primary_key=True)
     libro_id = db.Column(db.Integer, db.ForeignKey('libros.id'), nullable=False)
-    titulo = db.Column(db.String(200), nullable=False)  # Campo título en préstamo
+    titulo = db.Column(db.String(200), nullable=False)
     nombre_lector = db.Column(db.String(150), nullable=False)
     fecha_prestamo = db.Column(db.Date, nullable=False)
     fecha_devolucion = db.Column(db.Date, nullable=False)
 
-# Crear tablas si no existen
 with app.app_context():
     db.create_all()
 
@@ -58,13 +60,11 @@ def buscar():
 
     catalogo = Libro.query.all()
 
-    # Filtrado
     if query:
         catalogo = [libro for libro in catalogo if query.lower() in libro.titulo.lower()]
     if letra:
         catalogo = [libro for libro in catalogo if libro.titulo.upper().startswith(letra)]
 
-    # Orden alfabético
     catalogo.sort(key=lambda x: x.titulo)
 
     return render_template('buscar.html', letras=letras, catalogo=catalogo, query=query, letra=letra)
@@ -72,9 +72,9 @@ def buscar():
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
     if request.method == 'POST':
-        datos = {k: request.form.get(k) for k in ['titulo', 'autor', 'genero', 'editorial', 'anio', 'ubicacion']}
-        if not all(datos.values()):
-            flash("Todos los campos son obligatorios.", "danger")
+        datos = {k: request.form.get(k) for k in ['titulo', 'autor', 'genero', 'editorial', 'anio', 'ubicacion', 'idioma', 'casa']}
+        if not all([datos[k] for k in ['titulo', 'autor', 'genero', 'editorial', 'anio', 'ubicacion']]):
+            flash("Todos los campos obligatorios deben completarse.", "danger")
             return redirect(url_for('registrar'))
 
         try:
@@ -85,6 +85,8 @@ def registrar():
                 editorial=datos['editorial'],
                 anio=int(datos['anio']),
                 ubicacion=datos['ubicacion'],
+                idioma=datos.get('idioma'),
+                casa=datos.get('casa'),
                 estado='Disponible'
             )
             db.session.add(libro)
