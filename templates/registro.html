@@ -51,13 +51,16 @@
     <form method="POST" action="{{ url_for('registro') }}" id="registroForm" novalidate>
       <div class="mb-3">
         <label for="nombreUsuario" class="form-label">Nombre de usuario</label>
-        <input type="text" class="form-control" id="nombreUsuario" name="nombre_usuario" required autofocus>
+        <input type="text" class="form-control" id="nombreUsuario" name="nombre_usuario" required autofocus
+               pattern="^[\w\.]{3,30}$"
+               title="3 a 30 caracteres: letras, números, puntos o guion bajo, sin espacios">
+        <div class="invalid-feedback">Nombre inválido. Usa 3-30 caracteres, letras, números, puntos o guion bajo, sin espacios.</div>
       </div>
 
       <div class="mb-3">
         <label for="regContrasena" class="form-label">Contraseña</label>
-        <input type="password" class="form-control" id="regContrasena" name="contrasena" required>
-        <div class="invalid-feedback">La contraseña no debe contener espacios.</div>
+        <input type="password" class="form-control" id="regContrasena" name="contrasena" required minlength="6">
+        <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres y no contener espacios.</div>
       </div>
 
       <div class="mb-3">
@@ -70,6 +73,7 @@
           <option>¿Cuál es tu comida favorita?</option>
           <option>¿Cuál es tu deporte favorito?</option>
         </select>
+        <div class="invalid-feedback">Por favor selecciona una pregunta de seguridad.</div>
       </div>
 
       <div class="mb-3">
@@ -86,14 +90,26 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const form = document.getElementById("registroForm");
+      const nombreUsuario = document.getElementById("nombreUsuario");
       const contrasena = document.getElementById("regContrasena");
       const respuesta = document.getElementById("respuestaSeguridad");
+      const preguntaSeguridad = document.getElementById("preguntaSeguridad");
 
       form.addEventListener("submit", function (e) {
         let valido = true;
 
-        // Validar contraseña sin espacios
-        if (/\s/.test(contrasena.value)) {
+        // Validar patrón nombre usuario
+        if (!nombreUsuario.checkValidity()) {
+          nombreUsuario.classList.add("is-invalid");
+          nombreUsuario.classList.remove("is-valid");
+          valido = false;
+        } else {
+          nombreUsuario.classList.remove("is-invalid");
+          nombreUsuario.classList.add("is-valid");
+        }
+
+        // Validar contraseña sin espacios y longitud mínima 6
+        if (/\s/.test(contrasena.value) || contrasena.value.length < 6) {
           contrasena.classList.add("is-invalid");
           contrasena.classList.remove("is-valid");
           valido = false;
@@ -102,7 +118,17 @@
           contrasena.classList.add("is-valid");
         }
 
-        // Validar respuesta de seguridad (una palabra sin espacios)
+        // Validar pregunta seguridad seleccionada
+        if (!preguntaSeguridad.value) {
+          preguntaSeguridad.classList.add("is-invalid");
+          preguntaSeguridad.classList.remove("is-valid");
+          valido = false;
+        } else {
+          preguntaSeguridad.classList.remove("is-invalid");
+          preguntaSeguridad.classList.add("is-valid");
+        }
+
+        // Validar respuesta seguridad (una palabra sin espacios)
         const respuestaVal = respuesta.value.trim();
         if (respuestaVal === "" || /\s/.test(respuestaVal)) {
           respuesta.classList.add("is-invalid");
