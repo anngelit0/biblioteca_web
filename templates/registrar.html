@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Registrar Libro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8" />
+    <title>Registrar nuevo libro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
     <style>
         body {
             background: url("{{ url_for('static', filename='img/prestamos.png') }}") no-repeat center center fixed;
             background-size: cover;
-            font-family: 'Poppins', sans-serif;
+            font-family: "Poppins", sans-serif;
             color: #333;
             overflow-x: hidden;
             min-height: 100vh;
@@ -25,7 +28,7 @@
             border-radius: 10px;
             max-width: 900px;
             width: 100%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
 
         h1 {
@@ -55,48 +58,131 @@
         <form action="/registrar" method="POST" class="needs-validation" novalidate>
             <div class="mb-3">
                 <label for="titulo" class="form-label">Título</label>
-                <input type="text" name="titulo" id="titulo" class="form-control" required autocomplete="off">
+                <input
+                    type="text"
+                    name="titulo"
+                    id="titulo"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="autor" class="form-label">Autor</label>
-                <input type="text" name="autor" id="autor" class="form-control" required autocomplete="off"
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$" title="Solo letras y espacios">
+                <input
+                    type="text"
+                    name="autor"
+                    id="autor"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+                    title="Solo letras y espacios"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="genero" class="form-label">Género</label>
-                <input type="text" name="genero" id="genero" class="form-control" required autocomplete="off"
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$" title="Solo letras y espacios">
+                <input
+                    type="text"
+                    name="genero"
+                    id="genero"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+                    title="Solo letras y espacios"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="editorial" class="form-label">Editorial</label>
-                <input type="text" name="editorial" id="editorial" class="form-control" required autocomplete="off"
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$" title="Solo letras y espacios">
+                <input
+                    type="text"
+                    name="editorial"
+                    id="editorial"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+                    title="Solo letras y espacios"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="anio" class="form-label">Año</label>
-                <input type="number" name="anio" id="anio" class="form-control" required autocomplete="off"
-                    min="0" max="2100" step="1" title="Introduce un año válido (ej. 2025)">
+                <input
+                    type="number"
+                    name="anio"
+                    id="anio"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                    min="0"
+                    max="2100"
+                    step="1"
+                    title="Introduce un año válido (ej. 2025)"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="ubicacion" class="form-label">Ubicación</label>
-                <input type="text" name="ubicacion" id="ubicacion" class="form-control" required autocomplete="off"
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s\-]+$" title="Letras, números y guiones permitidos">
+                <input
+                    type="text"
+                    name="ubicacion"
+                    id="ubicacion"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s\-]+$"
+                    title="Letras, números y guiones permitidos"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="estado" class="form-label">Estado</label>
-                <input type="text" name="estado" id="estado" class="form-control" required autocomplete="off"
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$" title="Solo letras y espacios">
+                <input
+                    type="text"
+                    name="estado"
+                    id="estado"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+                    title="Solo letras y espacios"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="idioma" class="form-label">Idioma</label>
-                <input type="text" name="idioma" id="idioma" class="form-control" required autocomplete="off"
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$" title="Solo letras y espacios">
+                <input
+                    type="text"
+                    name="idioma"
+                    id="idioma"
+                    class="form-control"
+                    required
+                    autocomplete="off"
+                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+                    title="Solo letras y espacios"
+                />
             </div>
+
             <div class="mb-3">
                 <label for="casa" class="form-label">Casa</label>
-                <input type="text" name="casa" id="casa" class="form-control" required autocomplete="off"
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s\-]+$" title="Letras, números y guiones permitidos">
+                <select
+                    name="casa"
+                    id="casa"
+                    class="form-select"
+                    required
+                    autocomplete="off"
+                >
+                    <option value="" selected disabled>Selecciona una casa</option>
+                    <option value="marcela">Marcela</option>
+                    <option value="victor">Víctor</option>
+                </select>
             </div>
+
             <button type="submit" class="btn btn-custom w-100">Registrar libro</button>
         </form>
     </div>
@@ -105,18 +191,23 @@
     <script>
         // Validación personalizada Bootstrap 5
         (() => {
-            'use strict'
-            const forms = document.querySelectorAll('.needs-validation')
-            Array.from(forms).forEach(form => {
-                form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
+            "use strict";
+
+            const forms = document.querySelectorAll(".needs-validation");
+            Array.from(forms).forEach((form) => {
+                form.addEventListener(
+                    "submit",
+                    (event) => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add("was-validated");
+                    },
+                    false
+                );
+            });
+        })();
     </script>
 </body>
 </html>
