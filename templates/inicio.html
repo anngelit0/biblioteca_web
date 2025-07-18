@@ -101,6 +101,32 @@
     .btn-logout:hover {
       background-color: #bb2d3b;
     }
+    .brillo-texto {
+      position: relative;
+      display: inline-block;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .brillo-texto::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+      animation: brillo 2.5s infinite;
+    }
+
+    @keyframes brillo {
+      0% {
+        left: -75%;
+      }
+      100% {
+        left: 125%;
+      }
+    }
   </style>
 </head>
 
@@ -130,6 +156,11 @@
 
   <div id="contenidoPrincipal" class="contenido {% if not session.get('user_id') and not session.get('guest') %}blurred{% endif %}">
     <h1>BIBLIOTECA</h1>
+      {% if username %}
+        <h2 class="text-white mt-2 brillo-texto" style="font-size: 1.8rem;">
+          Hola {{ username }} 😸, me alegra tenerte aquí. ¡Explora y disfruta tu biblioteca!
+        </h2>
+      {% endif %}
     <div class="botones">
       <a href="/buscar" class="btn-personalizado">Búsqueda de libros</a>
       <a href="#" class="btn-personalizado accion-restringida" data-accion="registrar">Registrar nuevo libro</a>

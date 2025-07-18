@@ -209,7 +209,8 @@
                                                 type="button"
                                                 class="btn btn-prestamo btn-sm accion-restringida"
                                                 data-accion="prestamo"
-                                                data-libro-id="{{ libro.id }}">
+                                                data-libro-id="{{ libro.id }}"
+                                                data-libro-titulo="{{ libro.titulo|urlencode }}">
                                                 Tomar prestado
                                             </button>
                                         {% else %}
@@ -306,7 +307,8 @@
             }
 
             if (accion === 'prestamo') {
-              window.location.href = `/prestamos?libro_id=${libroId}`;
+                const libroTitulo = this.dataset.libroTitulo;
+                window.location.href = `/prestamos?libro_id=${libroId}&titulo=${libroTitulo}`;
             } else if (accion === 'baja') {
               toggleBajaForm(libroId);
             }
