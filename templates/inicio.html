@@ -66,10 +66,56 @@
       transform: scale(1.05);
       background-color: hwb(193 89% 0%);
     }
+
+    /* Botones esquina superior derecha */
+    .top-right-buttons {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+      z-index: 1100; /* por encima de modales */
+    }
+
+    .btn-small {
+      font-size: 0.8rem;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-login {
+      background-color: #198754; /* verde bootstrap */
+      color: white;
+    }
+    .btn-login:hover {
+      background-color: #157347;
+    }
+
+    .btn-logout {
+      background-color: #dc3545; /* rojo bootstrap */
+      color: white;
+    }
+    .btn-logout:hover {
+      background-color: #bb2d3b;
+    }
   </style>
 </head>
 
 <body>
+  <!-- Botones esquina superior derecha -->
+  <div class="top-right-buttons">
+    <button id="btnIniciarSesion" class="btn-small btn-login">Iniciar Sesión</button>
+
+    {% if session.get('user_id') %}
+      <form id="logoutForm" method="POST" action="{{ url_for('logout') }}" style="margin:0;">
+        <button type="submit" class="btn-small btn-logout">Cerrar Sesión</button>
+      </form>
+    {% endif %}
+  </div>
+
   <div id="contenidoPrincipal" class="contenido {% if not session.get('user_id') and not session.get('guest') %}blurred{% endif %}">
     <h1>BIBLIOTECA</h1>
     <div class="botones">
@@ -166,15 +212,16 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Convertimos las variables Jinja a JSON válidos
     const userId = JSON.parse('{{ session.get("user_id")|tojson|safe }}');
     const guest = JSON.parse('{{ session.get("guest")|tojson|safe }}');
 
+    // Mostrar modal automáticamente sólo si NO hay usuario ni invitado
     if (!userId && !guest) {
       const authModal = new bootstrap.Modal(document.getElementById('authModal'));
       authModal.show();
     }
 
+    // Botón para entrar como invitado (del modal grande)
     const guestTab = document.getElementById('guest-tab');
     if (guestTab) {
       guestTab.addEventListener('click', () => {
@@ -191,6 +238,13 @@
           });
       });
     }
+
+    // Botón pequeño "Iniciar Sesión" esquina superior derecha
+    const btnIniciarSesion = document.getElementById('btnIniciarSesion');
+    btnIniciarSesion.addEventListener('click', () => {
+      const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+      authModal.show();
+    });
   });
 </script>
 
