@@ -227,7 +227,7 @@
     const userId = JSON.parse('{{ session.get("user_id")|tojson|safe }}');
     const guest = JSON.parse('{{ session.get("guest")|tojson|safe }}');
 
-    // Mostrar modal automáticamente si NO hay usuario ni invitado
+    // Mostrar modal autenticación si NO hay usuario ni invitado
     if (!userId && !guest) {
       const authModal = new bootstrap.Modal(document.getElementById('authModal'));
       authModal.show();
@@ -260,21 +260,18 @@
       });
     }
 
-    // Interceptar clics en botones protegidos
-    const registrarBtn = document.querySelector('a[href="/registrar"]');
-    const prestamosBtn = document.querySelector('a[href="/prestamos"]');
-
-    [registrarBtn, prestamosBtn].forEach(btn => {
-      if (btn) {
-        btn.addEventListener('click', function (e) {
-          if (!userId && !guest) {
-            e.preventDefault(); // Evita redirección
-            const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-            authModal.show();
-          }
-        });
-      }
+    // Bloquear apertura de pestañas si no hay sesión ni invitado
+    const enlacesBloqueados = document.querySelectorAll('.btn-personalizado');
+    enlacesBloqueados.forEach(link => {
+      link.addEventListener('click', function (e) {
+        if (!userId && !guest) {
+          e.preventDefault();
+          const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+          authModal.show();
+        }
+      });
     });
+
   });
 </script>
 

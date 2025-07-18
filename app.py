@@ -147,20 +147,30 @@ def inicio():
 
 @app.route('/buscar')
 def buscar():
-    query = request.args.get('query', '')
-    letra = request.args.get('letra', '')
+    query = request.args.get('query', '').strip()
+    letra = request.args.get('letra', '').strip().upper()
+    casa = request.args.get('casa', '').strip().lower()
     letras = list(string.ascii_uppercase)
 
-    catalogo = Libro.query.all()
+    # Partimos de la consulta base
+    consulta = Libro.query
 
+    # Aplicar filtro por búsqueda de texto en título (si existe)
     if query:
-        catalogo = [libro for libro in catalogo if query.lower() in libro.titulo.lower()]
+        consulta = consulta.filter(Libro.titulo.ilike(f'%{query}%'))
+
+    # Aplicar filtro por letra inicial en título (si existe)
     if letra:
-        catalogo = [libro for libro in catalogo if libro.titulo.upper().startswith(letra)]
+        consulta = consulta.filter(Libro.titulo.ilike(f'{letra}%'))
 
-    catalogo.sort(key=lambda x: x.titulo)
+    # Aplicar filtro por casa (si existe)
+    if casa:
+        consulta = consulta.filter(Libro.casa.ilike(casa))
 
-    return render_template('buscar.html', letras=letras, catalogo=catalogo, query=query, letra=letra)
+    # Obtener lista ordenada por título
+    catalogo = consulta.order_by(Libro.titulo).all()
+
+    return render_template('buscar.html', letras=letras, catalogo=catalogo, query=query, letra=letra, casa=casa)
 
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():

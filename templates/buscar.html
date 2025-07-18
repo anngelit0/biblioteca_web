@@ -242,30 +242,41 @@
         </div>
     </div>
 
-    <!-- Modal de inicio de sesión -->
+    <!-- Modal de acceso restringido (sin botones) -->
     <div class="modal fade" id="modalLoginRequerido" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title" id="modalLoginLabel">Acceso restringido</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body text-center">
                     Debes iniciar sesión para realizar esta acción.
-                </div>
-                <div class="modal-footer">
-                    <a href="/login" class="btn btn-success">Iniciar sesión</a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Script para mostrar y cerrar automáticamente el modal -->
+    {% if mostrar_modal %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalElement = document.getElementById('modalLoginRequerido');
+            if (modalElement) {
+                const modalBootstrap = new bootstrap.Modal(modalElement);
+                modalBootstrap.show();
+                setTimeout(() => {
+                    modalBootstrap.hide();
+                }, 3000);
+            }
+        });
+    </script>
+    {% endif %}
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        const usuario = JSON.parse('{{ (session.get("usuario") is not none) | tojson | safe }}');
-        const esInvitado = JSON.parse('{{ (session.get("tipo") == "invitado") | tojson | safe }}');
+        const usuario = JSON.parse('{{ (session.get("user_id") is not none) | tojson | safe }}');
+        const esInvitado = JSON.parse('{{ (session.get("guest") == true) | tojson | safe }}');
 
         function toggleBajaForm(libroId) {
           const form = document.getElementById('form-baja-' + libroId);
@@ -295,7 +306,7 @@
             }
 
             if (accion === 'prestamo') {
-              window.location.href = `/prestamos/${libroId}`;
+              window.location.href = `/prestamos?libro_id=${libroId}`;
             } else if (accion === 'baja') {
               toggleBajaForm(libroId);
             }
