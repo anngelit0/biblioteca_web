@@ -2,6 +2,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask import render_template, request, redirect, url_for, session, flash
 import string
 import os
 
@@ -17,6 +19,26 @@ db = SQLAlchemy(app)
 # -----------------------
 # MODELOS
 # -----------------------
+
+class Usuario(db.Model):
+    __tablename__ = 'usuarios'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre_usuario = db.Column(db.String(100), unique=True, nullable=False)
+    contrasena_hash = db.Column(db.String(200), nullable=False)
+    pregunta_seguridad = db.Column(db.String(200), nullable=False)
+    respuesta_seguridad_hash = db.Column(db.String(200), nullable=False)
+
+    def set_password(self, contrasena):
+        self.contrasena_hash = generate_password_hash(contrasena)
+
+    def check_password(self, contrasena):
+        return check_password_hash(self.contrasena_hash, contrasena)
+
+    def set_respuesta_seguridad(self, respuesta):
+        self.respuesta_seguridad_hash = generate_password_hash(respuesta.lower())
+
+    def check_respuesta_seguridad(self, respuesta):
+        return check_password_hash(self.respuesta_seguridad_hash, respuesta.lower())
 
 class Libro(db.Model):
     __tablename__ = 'libros'
@@ -46,6 +68,55 @@ with app.app_context():
 
 # -----------------------
 # RUTAS
+
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        nombre_usuario = request.form['nombre_usuario']
+        contrasena = request.form['contrasena']
+        pregunta_seguridad = request.form['pregunta_seguridad']
+        respuesta_seguridad = request.form['respuesta_seguridad']
+
+        if Usuario.query.filter_by(nombre_usuario=nombre_usuario).first():
+            flash("El nombre de usuario ya existe", "danger")
+            return redirect(url_for('registro'))
+
+        nuevo_usuario = Usuario(
+            nombre_usuario=nombre_usuario,
+            pregunta_seguridad=pregunta_seguridad
+        )
+        nuevo_usuario.set_password(contrasena)
+        nuevo_usuario.set_respuesta_seguridad(respuesta_seguridad)
+
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+
+        flash("Registro exitoso. Por favor inicia sesión.", "success")
+        return redirect(url_for('login'))
+    return render_template('registro.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        nombre_usuario = request.form['nombre_usuario']
+        contrasena = request.form['contrasena']
+
+        usuario = Usuario.query.filter_by(nombre_usuario=nombre_usuario).first()
+        if usuario and usuario.check_password(contrasena):
+            session.clear()
+            session['user_id'] = usuario.id
+            flash("Sesión iniciada", "success")
+            return redirect(url_for('inicio'))
+        else:
+            flash("Usuario o contraseña incorrectos", "danger")
+    return render_template('login.html')
+
+@app.route('/invitado')
+def invitado():
+    session.clear()
+    session['guest'] = True
+    flash("Entraste como invitado", "info")
+    return redirect(url_for('inicio'))
 # -----------------------
 
 @app.route('/')
