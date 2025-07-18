@@ -119,10 +119,10 @@
     {% endwith %}
   <!-- Botones esquina superior derecha -->
   <div class="top-right-buttons">
-    <button id="btnIniciarSesion" class="btn-small btn-login">Iniciar Sesión</button>
-
-    {% if session.get('user_id') %}
-      <form id="logoutForm" method="POST" action="{{ url_for('logout') }}" style="margin:0;">
+    {% if not session.get('user_id') and not session.get('guest') %}
+      <button id="btnIniciarSesion" class="btn-small btn-login">Iniciar Sesión</button>
+    {% else %}
+      <form id="logoutForm" method="GET" action="{{ url_for('logout') }}" style="margin:0;">
         <button type="submit" class="btn-small btn-logout">Cerrar Sesión</button>
       </form>
     {% endif %}

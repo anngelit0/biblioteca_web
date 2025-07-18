@@ -149,7 +149,7 @@ def invitado():
     session['user_id'] = None
     return '', 204
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET'])
 def logout():
     session.clear()
     flash("Sesión cerrada", "info")
