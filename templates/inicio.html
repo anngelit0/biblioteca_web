@@ -179,7 +179,7 @@
 
             <!-- Registro -->
             <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-              <form method="POST" action="{{ url_for('registro') }}">
+              <form id="registroForm" method="POST" action="{{ url_for('registro') }}">
                 <div class="mb-3">
                   <label for="regUsuario" class="form-label">Nombre de Usuario</label>
                   <input type="text" class="form-control" id="regUsuario" name="nombre_usuario" required autocomplete="off" />
@@ -187,19 +187,29 @@
                 <div class="mb-3">
                   <label for="regContrasena" class="form-label">Contraseña</label>
                   <input type="password" class="form-control" id="regContrasena" name="contrasena" required autocomplete="off" />
+                  <div class="invalid-feedback">La contraseña no debe contener espacios.</div>
                 </div>
                 <div class="mb-3">
                   <label for="preguntaSeguridad" class="form-label">Pregunta de Seguridad</label>
-                  <input type="text" class="form-control" id="preguntaSeguridad" name="pregunta_seguridad" required autocomplete="off" placeholder="Ejemplo: ¿Cuál es tu color favorito?" />
+                  <select class="form-select" id="preguntaSeguridad" name="pregunta_seguridad" required>
+                    <option value="" disabled selected>Seleccione una pregunta</option>
+                    <option value="¿Cuál es tu color favorito?">¿Cuál es tu color favorito?</option>
+                    <option value="¿Cuál es tu fruta favorita?">¿Cuál es tu fruta favorita?</option>
+                    <option value="¿En qué ciudad naciste?">¿En qué ciudad naciste?</option>
+                    <option value="¿Cuál es tu comida favorita?">¿Cuál es tu comida favorita?</option>
+                    <option value="¿Cuál es tu deporte favorito?">¿Cuál es tu deporte favorito?</option>
+                  </select>
                 </div>
                 <div class="mb-3">
                   <label for="respuestaSeguridad" class="form-label">Respuesta de Seguridad</label>
                   <input type="text" class="form-control" id="respuestaSeguridad" name="respuesta_seguridad" required autocomplete="off" />
+                  <div class="form-text text-success">Por favor, ingrese solo una palabra sin espacios.</div>
+                  <div class="invalid-feedback">La respuesta debe ser una sola palabra, sin espacios.</div>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Crear Cuenta</button>
               </form>
             </div>
-            
+
             <!-- Recuperación -->
             <div class="tab-pane fade" id="recover" role="tabpanel" aria-labelledby="recover-tab">
               <form method="POST" action="{{ url_for('recuperar_contrasena') }}">
@@ -291,6 +301,42 @@
           window.location.href = '/prestamos';
         }
       });
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("registroForm");
+    const contrasena = document.getElementById("regContrasena");
+    const respuesta = document.getElementById("respuestaSeguridad");
+
+    form.addEventListener("submit", function (e) {
+      let valido = true;
+
+      // Validar contraseña sin espacios
+      if (/\s/.test(contrasena.value)) {
+        contrasena.classList.add("is-invalid");
+        contrasena.classList.remove("is-valid");
+        valido = false;
+      } else {
+        contrasena.classList.remove("is-invalid");
+        contrasena.classList.add("is-valid");
+      }
+
+      // Validar que la respuesta no sea solo espacios y que no tenga espacios internos
+      const respuestaVal = respuesta.value.trim();
+      if (respuestaVal === "" || /\s/.test(respuestaVal)) {
+        respuesta.classList.add("is-invalid");
+        respuesta.classList.remove("is-valid");
+        valido = false;
+      } else {
+        respuesta.classList.remove("is-invalid");
+        respuesta.classList.add("is-valid");
+      }
+
+      if (!valido) {
+        e.preventDefault();
+      }
     });
   });
 </script>

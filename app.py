@@ -5,6 +5,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import string
 import os
+import re  # <-- Para validaciones
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -65,19 +66,60 @@ class Prestamo(db.Model):
 with app.app_context():
     db.create_all()
 
+# Preguntas válidas para registro
+PREGUNTAS_VALIDAS = [
+    "¿Cuál es tu color favorito?",
+    "¿Cuál es tu fruta favorita?",
+    "¿En qué ciudad naciste?",
+    "¿Cuál es tu comida favorita?",
+    "¿Cuál es tu deporte favorito?"
+]
+
+# Función para validar nombre de usuario
+def es_usuario_valido(nombre_usuario):
+    # Permitir sólo letras, números, guion bajo y puntos, mínimo 3 y máximo 30 caracteres, sin espacios
+    patron = r'^[\w\.]{3,30}$'
+    return re.match(patron, nombre_usuario) is not None
+
+# Función para validar contraseña
+def es_contrasena_valida(contrasena):
+    # Mínimo 6 caracteres, sin espacios
+    return len(contrasena) >= 6 and ' ' not in contrasena
+
 # -----------------------
 # RUTAS
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
-        nombre_usuario = request.form['nombre_usuario']
+        nombre_usuario = request.form['nombre_usuario'].strip()
         contrasena = request.form['contrasena']
         pregunta_seguridad = request.form['pregunta_seguridad']
-        respuesta_seguridad = request.form['respuesta_seguridad']
+        respuesta_seguridad = request.form['respuesta_seguridad'].strip()
 
+        # Validar usuario
+        if not es_usuario_valido(nombre_usuario):
+            flash("El nombre de usuario debe tener entre 3 y 30 caracteres, sólo letras, números, guion bajo y puntos, sin espacios.", "danger")
+            return redirect(url_for('registro'))
+
+        # Validar contraseña
+        if not es_contrasena_valida(contrasena):
+            flash("La contraseña debe tener al menos 6 caracteres y no contener espacios.", "danger")
+            return redirect(url_for('registro'))
+
+        # Validar pregunta de seguridad
+        if pregunta_seguridad not in PREGUNTAS_VALIDAS:
+            flash("Pregunta de seguridad inválida.", "danger")
+            return redirect(url_for('registro'))
+
+        # Validar respuesta de seguridad no vacía ni con espacios
+        if not respuesta_seguridad or ' ' in respuesta_seguridad:
+            flash("La respuesta de seguridad debe ser una sola palabra, sin espacios.", "danger")
+            return redirect(url_for('registro'))
+
+        # Validar usuario único
         if Usuario.query.filter_by(nombre_usuario=nombre_usuario).first():
-            flash("El nombre de usuario ya existe", "danger")
+            flash("El nombre de usuario ya existe.", "danger")
             return redirect(url_for('registro'))
 
         nuevo_usuario = Usuario(
@@ -92,6 +134,7 @@ def registro():
 
         flash("Registro exitoso. Por favor inicia sesión.", "success")
         return redirect(url_for('login'))
+
     return render_template('registro.html')
 
 @app.route('/login', methods=['GET', 'POST'])
