@@ -1,9 +1,8 @@
 # ... [Líneas iniciales sin cambios] ...
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import render_template, request, redirect, url_for, session, flash
 import string
 import os
 
@@ -50,8 +49,8 @@ class Libro(db.Model):
     anio = db.Column(db.Integer, nullable=False)
     ubicacion = db.Column(db.String(100), nullable=False)
     estado = db.Column(db.String(50), nullable=False, default='Disponible')
-    idioma = db.Column(db.String(100), nullable=True)   # Nuevo campo
-    casa = db.Column(db.String(100), nullable=True)     # Nuevo campo
+    idioma = db.Column(db.String(100), nullable=True)
+    casa = db.Column(db.String(100), nullable=True)
     prestamos = db.relationship('Prestamo', backref='libro', cascade="all, delete-orphan")
 
 class Prestamo(db.Model):
@@ -113,11 +112,34 @@ def login():
 
 @app.route('/invitado')
 def invitado():
-    session.clear()
     session['guest'] = True
-    flash("Entraste como invitado", "info")
+    session['user_id'] = None
+    return '', 204
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("Sesión cerrada", "info")
     return redirect(url_for('inicio'))
-# -----------------------
+
+@app.route('/recuperar_contrasena', methods=['GET', 'POST'])
+def recuperar_contrasena():
+    if request.method == 'POST':
+        nombre_usuario = request.form['nombre_usuario']
+        respuesta = request.form['respuesta_seguridad']
+        nueva_contrasena = request.form['nueva_contrasena']
+
+        usuario = Usuario.query.filter_by(nombre_usuario=nombre_usuario).first()
+        if usuario and usuario.check_respuesta_seguridad(respuesta):
+            usuario.set_password(nueva_contrasena)
+            db.session.commit()
+            flash("Contraseña actualizada exitosamente.", "success")
+            return redirect(url_for('login'))
+        else:
+            flash("Datos incorrectos.", "danger")
+            return redirect(url_for('recuperar_contrasena'))
+
+    return render_template('recuperar_contrasena.html', pregunta=None)
 
 @app.route('/')
 def inicio():
