@@ -105,6 +105,18 @@
 </head>
 
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
   <!-- Botones esquina superior derecha -->
   <div class="top-right-buttons">
     <button id="btnIniciarSesion" class="btn-small btn-login">Iniciar Sesión</button>
@@ -215,13 +227,13 @@
     const userId = JSON.parse('{{ session.get("user_id")|tojson|safe }}');
     const guest = JSON.parse('{{ session.get("guest")|tojson|safe }}');
 
-    // Mostrar modal automáticamente sólo si NO hay usuario ni invitado
+    // Mostrar modal automáticamente si NO hay usuario ni invitado
     if (!userId && !guest) {
       const authModal = new bootstrap.Modal(document.getElementById('authModal'));
       authModal.show();
     }
 
-    // Botón para entrar como invitado (del modal grande)
+    // Botón para entrar como invitado
     const guestTab = document.getElementById('guest-tab');
     if (guestTab) {
       guestTab.addEventListener('click', () => {
@@ -239,11 +251,29 @@
       });
     }
 
-    // Botón pequeño "Iniciar Sesión" esquina superior derecha
+    // Botón pequeño "Iniciar Sesión"
     const btnIniciarSesion = document.getElementById('btnIniciarSesion');
-    btnIniciarSesion.addEventListener('click', () => {
-      const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-      authModal.show();
+    if (btnIniciarSesion) {
+      btnIniciarSesion.addEventListener('click', () => {
+        const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+        authModal.show();
+      });
+    }
+
+    // Interceptar clics en botones protegidos
+    const registrarBtn = document.querySelector('a[href="/registrar"]');
+    const prestamosBtn = document.querySelector('a[href="/prestamos"]');
+
+    [registrarBtn, prestamosBtn].forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', function (e) {
+          if (!userId && !guest) {
+            e.preventDefault(); // Evita redirección
+            const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+            authModal.show();
+          }
+        });
+      }
     });
   });
 </script>

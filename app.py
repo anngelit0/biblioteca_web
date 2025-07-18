@@ -164,6 +164,12 @@ def buscar():
 
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
+    if not session.get('user_id'):
+        return render_template('inicio.html', mostrar_modal=True)
+    if session.get('guest'):
+        flash("Los invitados no pueden registrar libros. Inicia sesión.", "warning")
+        return redirect(url_for('inicio'))
+
     if request.method == 'POST':
         datos = {k: request.form.get(k) for k in ['titulo', 'autor', 'genero', 'editorial', 'anio', 'ubicacion', 'idioma', 'casa']}
         if not all([datos[k] for k in ['titulo', 'autor', 'genero', 'editorial', 'anio', 'ubicacion']]):
@@ -195,7 +201,12 @@ def registrar():
 
 @app.route('/prestamos', methods=['GET', 'POST'])
 def prestamos():
-    # Obtener parámetros GET (cuando se abre el formulario desde buscar)
+    if not session.get('user_id'):
+        return render_template('inicio.html', mostrar_modal=True)
+    if session.get('guest'):
+        flash("Los invitados no pueden registrar préstamos. Inicia sesión.", "warning")
+        return render_template('inicio.html', mostrar_modal=True)
+
     libro_id = request.args.get("libro_id")
     titulo_libro = request.args.get("titulo")
 
@@ -220,7 +231,6 @@ def prestamos():
                 flash("El libro ya está prestado.", "warning")
                 return redirect(url_for('prestamos'))
 
-            # Si no se pasó título por el form, tomarlo del libro
             if not titulo:
                 titulo = libro.titulo
 
@@ -243,13 +253,12 @@ def prestamos():
             flash(f"Error al registrar préstamo: {e}", "danger")
             return redirect(url_for('prestamos'))
 
-    # Consultar préstamos existentes para mostrar
     try:
         prestamos = Prestamo.query.all()
         prestamos_list = []
         for p in prestamos:
             prestamos_list.append({
-                'libro_id': p.libro_id,  # Corregido para que sea 'libro_id' aquí también
+                'libro_id': p.libro_id,
                 'titulo': p.titulo,
                 'nombre_lector': p.nombre_lector,
                 'fecha_prestamo': p.fecha_prestamo.strftime('%Y-%m-%d'),
@@ -259,13 +268,41 @@ def prestamos():
         print("Error al cargar préstamos:", e)
         prestamos_list = []
 
-    # Enviar variables a la plantilla
     return render_template(
         'prestamos.html',
         prestamos=prestamos_list,
         libro_id=libro_id,
-        titulo=titulo_libro if libro_id else None  # Esta es la corrección principal
+        titulo=titulo_libro if libro_id else None
     )
+
+@app.route('/baja', methods=['POST'])
+def baja():
+    if not session.get('user_id'):
+        return render_template('inicio.html', mostrar_modal=True)
+    if session.get('guest'):
+        flash("Los invitados no pueden dar de baja libros.", "warning")
+        return render_template('inicio.html', mostrar_modal=True)
+
+    id_baja = request.form.get('id_baja')
+
+    if not id_baja:
+        flash("ID para baja no proporcionado.", "danger")
+        return redirect(url_for('buscar'))
+
+    libro = Libro.query.get(int(id_baja))
+    if not libro:
+        flash("Libro no encontrado.", "warning")
+        return redirect(url_for('buscar'))
+
+    try:
+        db.session.delete(libro)
+        db.session.commit()
+        flash(f"Libro con ID {id_baja} eliminado.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al eliminar libro: {e}", "danger")
+
+    return redirect(url_for('buscar'))
 
 @app.route('/devolver', methods=['POST'])
 def devolver():
@@ -292,29 +329,6 @@ def devolver():
         flash(f"Error al devolver libro: {e}", "danger")
 
     return redirect(url_for('prestamos'))
-
-@app.route('/baja', methods=['POST'])
-def baja():
-    id_baja = request.form.get('id_baja')
-
-    if not id_baja:
-        flash("ID para baja no proporcionado.", "danger")
-        return redirect(url_for('buscar'))
-
-    libro = Libro.query.get(int(id_baja))
-    if not libro:
-        flash("Libro no encontrado.", "warning")
-        return redirect(url_for('buscar'))
-
-    try:
-        db.session.delete(libro)
-        db.session.commit()
-        flash(f"Libro con ID {id_baja} eliminado.", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Error al eliminar libro: {e}", "danger")
-
-    return redirect(url_for('buscar'))
 
 if __name__ == '__main__':
     app.run(debug=True)

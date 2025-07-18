@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
     <style>
+        /* --- Tu CSS tal cual --- */
         body {
             margin: 0;
             padding: 0;
@@ -17,7 +18,8 @@
             font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            flex-direction: column;
         }
 
         .contenedor {
@@ -27,6 +29,7 @@
             width: 80%;
             max-height: 90vh;
             overflow-y: auto;
+            margin: 20px auto;
         }
 
         h1, p {
@@ -120,28 +123,36 @@
             width: 100%;
         }
 
-        /* Mini formulario de confirmación para dar baja */
         .form-baja-confirmacion {
             margin-top: 5px;
         }
     </style>
 </head>
 <body>
+
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <div class="contenedor">
         <h1>Búsqueda de Libros</h1>
         <p>Aquí puedes buscar tus libros favoritos.</p>
 
-        <!-- Filtros: búsqueda libre y filtrado por casa -->
+        <!-- Filtros -->
         <form method="GET" action="/buscar" class="mb-3">
             <div class="filtros">
-                <input
-                    type="text"
-                    name="query"
-                    class="barra-busqueda cursor-parpadeante"
-                    placeholder="Escribe aquí para buscar..."
-                    value="{{ query }}"
-                    autofocus
-                >
+                <input type="text" name="query" class="barra-busqueda cursor-parpadeante"
+                       placeholder="Escribe aquí para buscar..." value="{{ query }}" autofocus>
                 <select name="casa" class="form-select" style="max-width: 200px;">
                     <option value="">Todas las casas</option>
                     <option value="marcela" {% if casa=='marcela' %}selected{% endif %}>Casa de Marcela</option>
@@ -151,7 +162,7 @@
             </div>
         </form>
 
-        <!-- Botones del abecedario -->
+        <!-- Abecedario -->
         <div class="abecedario">
             {% for letra in letras %}
                 <a href="/buscar?letra={{ letra }}{% if casa %}&casa={{ casa }}{% endif %}" class="btn btn-outline-warning m-1">{{ letra }}</a>
@@ -159,7 +170,7 @@
             <a href="/buscar{% if casa %}?casa={{ casa }}{% endif %}" class="btn btn-danger btn-todo m-1">TODO</a>
         </div>
 
-        <!-- Resultados del catálogo -->
+        <!-- Catálogo -->
         <div class="tabla-catalogo">
             {% if catalogo %}
                 <div class="table-responsive">
@@ -181,39 +192,46 @@
                         </thead>
                         <tbody>
                             {% for libro in catalogo %}
-                            <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ libro.titulo }}</td>
-                                <td>{{ libro.autor }}</td>
-                                <td>{{ libro.genero }}</td>
-                                <td>{{ libro.editorial }}</td>
-                                <td>{{ libro.anio }}</td>
-                                <td>{{ libro.idioma }}</td>
-                                <td>{{ libro.ubicacion }}</td>
-                                <td>{{ libro.casa|capitalize }}</td>
-                                <td>{{ libro.estado }}</td>
-                                <td>
-                                    {% if libro.estado == 'Disponible' %}
-                                        <a href="{{ url_for('prestamos', libro_id=libro.id, titulo=libro.titulo) }}" class="btn btn-prestamo btn-sm">
-                                            Tomar prestado
-                                        </a>
-                                    {% else %}
-                                        <span class="text-danger fw-bold">No disponible</span>
-                                    {% endif %}
-
-                                    <!-- Botón para mostrar formulario de baja -->
-                                    <button type="button" class="btn btn-baja btn-sm ms-2" onclick="toggleBajaForm('{{ libro.id }}')">
-                                        Dar de baja
-                                    </button>
-
-                                    <!-- Mini formulario para confirmar baja -->
-                                    <form action="{{ url_for('baja') }}" method="post" id="form-baja-{{ libro.id }}" class="d-none form-baja-confirmacion">
-                                        <input type="hidden" name="id_baja" value="{{ libro.id }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Confirmar</button>
-                                        <button type="button" class="btn btn-sm btn-secondary" onclick="toggleBajaForm('{{ libro.id }}')">Cancelar</button>
-                                    </form>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ libro.titulo }}</td>
+                                    <td>{{ libro.autor }}</td>
+                                    <td>{{ libro.genero }}</td>
+                                    <td>{{ libro.editorial }}</td>
+                                    <td>{{ libro.anio }}</td>
+                                    <td>{{ libro.idioma }}</td>
+                                    <td>{{ libro.ubicacion }}</td>
+                                    <td>{{ libro.casa|capitalize }}</td>
+                                    <td>{{ libro.estado }}</td>
+                                    <td>
+                                        {% if libro.estado == 'Disponible' %}
+                                            <button
+                                                type="button"
+                                                class="btn btn-prestamo btn-sm accion-restringida"
+                                                data-accion="prestamo"
+                                                data-libro-id="{{ libro.id }}">
+                                                Tomar prestado
+                                            </button>
+                                        {% else %}
+                                            <span class="text-danger fw-bold">No disponible</span>
+                                        {% endif %}
+                                        <button
+                                            type="button"
+                                            class="btn btn-baja btn-sm ms-2 accion-restringida"
+                                            data-accion="baja"
+                                            data-libro-id="{{ libro.id }}">
+                                            Dar de baja
+                                        </button>
+                                        <form action="{{ url_for('baja') }}" method="post"
+                                              id="form-baja-{{ libro.id }}"
+                                              class="d-none form-baja-confirmacion">
+                                            <input type="hidden" name="id_baja" value="{{ libro.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Confirmar</button>
+                                            <button type="button" class="btn btn-sm btn-secondary"
+                                                    onclick="toggleBajaForm('{{ libro.id }}')">Cancelar</button>
+                                        </form>
+                                    </td>
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -224,11 +242,66 @@
         </div>
     </div>
 
+    <!-- Modal de inicio de sesión -->
+    <div class="modal fade" id="modalLoginRequerido" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalLoginLabel">Acceso restringido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    Debes iniciar sesión para realizar esta acción.
+                </div>
+                <div class="modal-footer">
+                    <a href="/login" class="btn btn-success">Iniciar sesión</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const usuario = JSON.parse('{{ (session.get("usuario") is not none) | tojson | safe }}');
+        const esInvitado = JSON.parse('{{ (session.get("tipo") == "invitado") | tojson | safe }}');
+
         function toggleBajaForm(libroId) {
-            const form = document.getElementById('form-baja-' + libroId);
+          const form = document.getElementById('form-baja-' + libroId);
+          if (form) {
             form.classList.toggle('d-none');
+          }
         }
+
+        window.toggleBajaForm = toggleBajaForm;
+
+        document.querySelectorAll('.accion-restringida').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            const accion = this.dataset.accion;
+            const libroId = this.dataset.libroId;
+
+            if (!usuario) {
+              e.preventDefault();
+              const modal = new bootstrap.Modal(document.getElementById('modalLoginRequerido'));
+              modal.show();
+              return;
+            }
+
+            if (esInvitado) {
+              e.preventDefault();
+              alert("Como invitado solo puedes visualizar libros. Inicia sesión para realizar esta acción.");
+              return;
+            }
+
+            if (accion === 'prestamo') {
+              window.location.href = `/prestamos/${libroId}`;
+            } else if (accion === 'baja') {
+              toggleBajaForm(libroId);
+            }
+          });
+        });
+      });
     </script>
 </body>
 </html>
