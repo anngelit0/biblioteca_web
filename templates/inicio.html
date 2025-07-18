@@ -244,12 +244,6 @@
     const userId = JSON.parse('{{ session.get("user_id")|tojson|safe }}');
     const guest = JSON.parse('{{ session.get("guest")|tojson|safe }}');
 
-    // Mostrar modal autenticación si NO hay usuario ni invitado
-    if (!userId && !guest) {
-      const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-      authModal.show();
-    }
-
     // Botón "Entrar como Invitado"
     const guestTab = document.getElementById('guest-tab');
     if (guestTab) {
@@ -283,7 +277,7 @@
       enlace.addEventListener('click', function (e) {
         e.preventDefault();
 
-        if (!userId && !guest) {
+        if (!userId || guest) {
           // Mostrar modal de acceso restringido
           const modal = new bootstrap.Modal(document.getElementById('modalLoginRequerido'));
           modal.show();
