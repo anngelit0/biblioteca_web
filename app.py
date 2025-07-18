@@ -253,9 +253,18 @@ def prestamos():
     libro_id = request.args.get("libro_id")
     titulo_libro = request.args.get("titulo")
 
+    # Obtener usuario actual para mostrar nombre
+    user_id = session.get('user_id')
+    usuario = None
+    username = ''
+    if user_id:
+        usuario = Usuario.query.get(user_id)
+        if usuario:
+            username = usuario.nombre_usuario
+
     if request.method == 'POST':
         libro_id = request.form.get("libro_id")
-        titulo = request.form.get("titulo")
+        # No enviamos título en el formulario según lo solicitado
         nombre = request.form.get("nombre")
         fecha_prestamo = request.form.get("fecha_prestamo")
         fecha_devolucion = request.form.get("fecha_devolucion")
@@ -274,8 +283,8 @@ def prestamos():
                 flash("El libro ya está prestado.", "warning")
                 return redirect(url_for('prestamos'))
 
-            if not titulo:
-                titulo = libro.titulo
+            # El título lo tomamos del libro en la BD
+            titulo = libro.titulo
 
             prestamo_nuevo = Prestamo(
                 libro_id=libro.id,
@@ -315,7 +324,8 @@ def prestamos():
         'prestamos.html',
         prestamos=prestamos_list,
         libro_id=libro_id,
-        titulo=titulo_libro if libro_id else None
+        titulo=titulo_libro if libro_id else None,
+        username=username  # <-- aquí pasamos el nombre del usuario
     )
 
 @app.route('/baja', methods=['POST'])
