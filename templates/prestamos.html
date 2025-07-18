@@ -86,7 +86,7 @@
             </button>
         </div>
 
-        <div class="collapse" id="formTomar">
+        <div class="collapse transition" id="formTomar">
             <form action="/prestamos" method="post" class="bg-white bg-opacity-75 p-4 rounded text-dark">
                 <div class="mb-3">
                     <label for="libro_id" class="form-label">ID del Libro</label>
@@ -102,21 +102,24 @@
                 </div>
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre del lector</label>
-                    <input type="text" name="nombre" id="nombre" class="form-control" required>
+                    <input type="text" name="nombre" id="nombre" class="form-control"
+                           autocomplete="off"
+                           pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+                           title="Solo letras y espacios" required>
                 </div>
                 <div class="mb-3">
                     <label for="fecha_prestamo" class="form-label">Fecha de préstamo</label>
-                    <input type="date" name="fecha_prestamo" id="fecha_prestamo" class="form-control" required>
+                    <input type="date" name="fecha_prestamo" id="fecha_prestamo" class="form-control" required autocomplete="off">
                 </div>
                 <div class="mb-3">
                     <label for="fecha_devolucion" class="form-label">Fecha de devolución</label>
-                    <input type="date" name="fecha_devolucion" id="fecha_devolucion" class="form-control" required>
+                    <input type="date" name="fecha_devolucion" id="fecha_devolucion" class="form-control" required autocomplete="off">
                 </div>
                 <button type="submit" class="btn btn-success">Confirmar</button>
             </form>
         </div>
         
-        <div class="collapse" id="formDevolver">
+        <div class="collapse transition" id="formDevolver">
             <form action="/devolver" method="post" class="bg-white bg-opacity-75 p-4 rounded text-dark">
                 <div class="mb-3">
                     <label for="libro_id_devolver" class="form-label">ID del Libro a devolver</label>
@@ -124,7 +127,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="comentarios" class="form-label">Comentarios (opcional)</label>
-                    <textarea name="comentarios" id="comentarios" class="form-control" rows="3"></textarea>
+                    <textarea name="comentarios" id="comentarios" class="form-control" rows="3" autocomplete="off"></textarea>
                 </div>
                 <button type="submit" class="btn btn-success">Confirmar devolución</button>
             </form>
@@ -172,18 +175,29 @@
         const collapseTomar = new bootstrap.Collapse(formTomar, { toggle: false });
         const collapseDevolver = new bootstrap.Collapse(formDevolver, { toggle: false });
 
+        let tomarVisible = false;
+        let devolverVisible = false;
+
         btnTomar.addEventListener('click', () => {
-            collapseTomar.show();
-            collapseDevolver.hide();
-            btnTomar.setAttribute('aria-expanded', 'true');
-            btnDevolver.setAttribute('aria-expanded', 'false');
+            if (tomarVisible) {
+                collapseTomar.hide();
+            } else {
+                collapseTomar.show();
+                collapseDevolver.hide();
+            }
+            tomarVisible = !tomarVisible;
+            devolverVisible = false;
         });
 
         btnDevolver.addEventListener('click', () => {
-            collapseDevolver.show();
-            collapseTomar.hide();
-            btnTomar.setAttribute('aria-expanded', 'false');
-            btnDevolver.setAttribute('aria-expanded', 'true');
+            if (devolverVisible) {
+                collapseDevolver.hide();
+            } else {
+                collapseDevolver.show();
+                collapseTomar.hide();
+            }
+            devolverVisible = !devolverVisible;
+            tomarVisible = false;
         });
     </script>
 </body>
