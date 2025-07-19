@@ -155,34 +155,76 @@ def logout():
     flash("Sesión cerrada", "info")
     return redirect(url_for('inicio'))
 
+# ... (todo tu código igual hasta aquí) ...
+
 @app.route('/recuperar_contrasena', methods=['GET', 'POST'])
 def recuperar_contrasena():
     if request.method == 'POST':
-        nombre_usuario = request.form['nombre_usuario']
-        respuesta = request.form['respuesta_seguridad']
-        nueva_contrasena = request.form['nueva_contrasena']
+        nombre_usuario = request.form.get('nombre_usuario', '').strip()
+        respuesta_seguridad = request.form.get('respuesta_seguridad', '').strip()
+        nueva_contrasena = request.form.get('nueva_contrasena', None)  # puede ser None si no está el campo
+        confirmar_contrasena = request.form.get('confirmar_contrasena', None)
+        nueva_pregunta = request.form.get('nueva_pregunta', None)
+        nueva_respuesta = request.form.get('nueva_respuesta', None)
 
         usuario = Usuario.query.filter_by(nombre_usuario=nombre_usuario).first()
-        if usuario and usuario.check_respuesta_seguridad(respuesta):
-            usuario.set_password(nueva_contrasena)
-            db.session.commit()
-            flash("Contraseña actualizada exitosamente.", "success")
-            return redirect(url_for('inicio'))
-        else:
-            flash("Datos incorrectos.", "danger")
-            return redirect(url_for('recuperar_contrasena'))
 
-    return render_template('recuperar_contrasena.html', pregunta=None)
+        if not usuario:
+            flash("Usuario no encontrado.", "danger")
+            return inicio(show_password_change=False)
+
+        # Paso 1: Validar respuesta de seguridad y aún no envió nueva contraseña
+        if nueva_contrasena is None:
+            if usuario.check_respuesta_seguridad(respuesta_seguridad):
+                # Mostrar formulario para cambiar contraseña y pregunta/resp
+                return inicio(show_password_change=True, nombre_usuario=nombre_usuario, pregunta_antigua=usuario.pregunta_seguridad)
+            else:
+                flash("Respuesta de seguridad incorrecta.", "danger")
+                return inicio(show_password_change=False)
+
+        # Paso 2: Validar nueva contraseña, confirmación y campos
+        if not nueva_contrasena or not confirmar_contrasena or not nueva_pregunta or not nueva_respuesta:
+            flash("Todos los campos deben completarse.", "danger")
+            return inicio(show_password_change=True, nombre_usuario=nombre_usuario, pregunta_antigua=usuario.pregunta_seguridad)
+
+        if nueva_contrasena != confirmar_contrasena:
+            flash("Las contraseñas no coinciden.", "danger")
+            return inicio(show_password_change=True, nombre_usuario=nombre_usuario, pregunta_antigua=usuario.pregunta_seguridad)
+
+        if nueva_pregunta not in PREGUNTAS_VALIDAS:
+            flash("Pregunta de seguridad inválida.", "danger")
+            return inicio(show_password_change=True, nombre_usuario=nombre_usuario, pregunta_antigua=usuario.pregunta_seguridad)
+
+        # Actualizar datos en la base
+        usuario.set_password(nueva_contrasena)
+        usuario.pregunta_seguridad = nueva_pregunta
+        usuario.set_respuesta_seguridad(nueva_respuesta)
+        db.session.commit()
+
+        flash("Contraseña renovada. Inicia sesión.", "success")
+        return redirect(url_for('inicio'))
+
+    # GET simplemente muestra la pestaña de recuperación dentro del modal
+    return inicio(show_password_change=False)
 
 @app.route('/')
-def inicio():
+def inicio(show_password_change=False, nombre_usuario=None, pregunta_antigua=None):
     user_id = session.get('user_id')
     username = ''
+    mostrar_modal = session.pop('mostrar_modal', False)
+
     if user_id:
         usuario = Usuario.query.get(user_id)
         if usuario:
             username = usuario.nombre_usuario
-    return render_template('inicio.html', username=username)
+
+    return render_template('inicio.html',
+                           username=username,
+                           mostrar_modal=mostrar_modal,
+                           show_password_change=show_password_change,
+                           nombre_usuario=nombre_usuario,
+                           pregunta_antigua=pregunta_antigua,
+                           PREGUNTAS_VALIDAS=PREGUNTAS_VALIDAS)
 
 @app.route('/buscar')
 def buscar():

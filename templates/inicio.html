@@ -200,15 +200,44 @@
             <!-- Recuperación -->
             <div class="tab-pane fade" id="recover" role="tabpanel" aria-labelledby="recover-tab">
               <form method="POST" action="{{ url_for('recuperar_contrasena') }}">
-                <div class="mb-3">
-                  <label for="usuarioRecuperar" class="form-label">Nombre de Usuario</label>
-                  <input type="text" class="form-control" id="usuarioRecuperar" name="nombre_usuario" required autocomplete="off" />
-                </div>
-                <div class="mb-3">
-                  <label for="respuestaRecuperar" class="form-label">Respuesta a la Pregunta de Seguridad</label>
-                  <input type="text" class="form-control" id="respuestaRecuperar" name="respuesta_seguridad" required autocomplete="off" />
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Restablecer Contraseña</button>
+                {% if not show_password_change %}
+                  <!-- Paso 1: Usuario y respuesta -->
+                  <div class="mb-3">
+                    <label for="usuarioRecuperar" class="form-label">Nombre de Usuario</label>
+                    <input type="text" class="form-control" id="usuarioRecuperar" name="nombre_usuario" value="{{ nombre_usuario or '' }}" required autocomplete="off" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="respuestaRecuperar" class="form-label">Respuesta a la Pregunta de Seguridad</label>
+                    <input type="text" class="form-control" id="respuestaRecuperar" name="respuesta_seguridad" required autocomplete="off" />
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100">Verificar respuesta</button>
+                {% else %}
+                  <!-- Paso 2: Nueva contraseña y nueva pregunta -->
+                  <input type="hidden" name="nombre_usuario" value="{{ nombre_usuario }}">
+                  <p><strong>Pregunta de seguridad anterior:</strong> {{ pregunta_antigua }}</p>
+                  <div class="mb-3">
+                    <label for="nueva_contrasena" class="form-label">Nueva contraseña</label>
+                    <input type="password" class="form-control" id="nueva_contrasena" name="nueva_contrasena" required autocomplete="off" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="confirmar_contrasena" class="form-label">Confirmar contraseña</label>
+                    <input type="password" class="form-control" id="confirmar_contrasena" name="confirmar_contrasena" required autocomplete="off" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="nueva_pregunta" class="form-label">Nueva pregunta de seguridad</label>
+                    <select class="form-select" id="nueva_pregunta" name="nueva_pregunta" required>
+                      <option value="" disabled selected>Selecciona una pregunta</option>
+                      {% for pregunta in PREGUNTAS_VALIDAS %}
+                        <option value="{{ pregunta }}" {% if pregunta == pregunta_antigua %}selected{% endif %}>{{ pregunta }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                      <label for="nueva_respuesta" class="form-label">Respuesta de seguridad</label>
+                      <input type="text" class="form-control" id="nueva_respuesta" name="nueva_respuesta" required autocomplete="off" />
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100">Actualizar contraseña</button>
+                {% endif %}
               </form>
             </div>
           </div>
@@ -290,5 +319,33 @@
     });
   });
 </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const dataDiv = document.getElementById('reset-password-data');
+    if (!dataDiv) return;
+
+    const showPasswordChange = dataDiv.dataset.showPasswordChange === 'true';
+    const hasMessages = dataDiv.dataset.hasMessages === 'true';
+
+    if (showPasswordChange || hasMessages) {
+      const authModalEl = document.getElementById('authModal');
+      if (authModalEl) {
+        const authModal = new bootstrap.Modal(authModalEl);
+        authModal.show();
+      }
+
+      const recoverTabTrigger = document.querySelector('#recover-tab');
+      if (recoverTabTrigger) {
+        const tab = new bootstrap.Tab(recoverTabTrigger);
+        tab.show();
+      }
+    }
+  });
+</script>
+<div id="reset-password-data"
+  data-show-password-change="{{ 'true' if show_password_change else 'false' }}"
+  data-has-messages="{{ 'true' if get_flashed_messages() else 'false' }}"
+  hidden>
+</div>
 </body>
 </html>
