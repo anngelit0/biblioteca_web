@@ -211,16 +211,17 @@ def recuperar_contrasena():
 def inicio(show_password_change=False, nombre_usuario=None, pregunta_antigua=None):
     user_id = session.get('user_id')
     username = ''
-    mostrar_modal = session.pop('mostrar_modal', False)
 
     if user_id:
         usuario = Usuario.query.get(user_id)
         if usuario:
             username = usuario.nombre_usuario
+    elif session.get('guest'):
+        username = 'Invitado'
 
     return render_template('inicio.html',
                            username=username,
-                           mostrar_modal=mostrar_modal,
+                           mostrar_modal=session.pop('mostrar_modal', False),
                            show_password_change=show_password_change,
                            nombre_usuario=nombre_usuario,
                            pregunta_antigua=pregunta_antigua,

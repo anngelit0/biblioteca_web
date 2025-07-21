@@ -139,7 +139,11 @@
     <h1>BIBLIOTECA</h1>
       {% if username %}
         <h2 class="saludo">
-          Hola, {{ username }} 😸, me alegra tenerte aquí. ¡Explora y disfruta tu biblioteca!
+          Hola, {{ username }} {% if username == 'Invitado' %}👋, estás navegando como invitado. Sólo puedes ver el catálogo.{% else %}😸, me alegra tenerte aquí. ¡Explora y disfruta tu biblioteca!{% endif %}
+        </h2>
+      {% else %}
+        <h2 class="saludo">
+          !Hola!😸 Haz iniciado sesión como invitado, solo puedes consultar el catálogo de libros.
         </h2>
       {% endif %}
     <div class="botones">
